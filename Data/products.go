@@ -21,7 +21,7 @@ type Product struct{
 
 type Products []*Product
 
-func (p *Product) ToJson(w io.Writer)error{
+func (p *Products) ToJson(w io.Writer)error{
 
 	e := json.NewEncoder(w)
 	return e.Encode(p)
