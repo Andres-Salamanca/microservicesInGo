@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/Andres-Salamanca/microcourse/handlers"
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -16,14 +17,20 @@ func main() {
 	logger := log.New(os.Stdout, "product-api", log.LstdFlags)
 
 
-	/*hw := handlers.NewHello(logger)
-	hg := handlers.NewGoodBye(logger)*/
 	hp := handlers.NewProducts(logger)
-	sm := http.NewServeMux()
-	/*sm.Handle("/", hw)
-	sm.Handle("/goodbye", hg)*/
 
-	sm.Handle("/", hp)
+	sm := mux.NewRouter()
+
+	getRouter := sm.Methods(http.MethodGet).Subrouter()
+	getRouter.HandleFunc("/",hp.GetProducts)
+
+	putRouter := sm.Methods(http.MethodPut).Subrouter()
+	putRouter.HandleFunc("/{id:[0-9]+}", hp.UpdateProducts)
+	putRouter.Use(hp.MiddlewareProductValidation)
+
+	postRouter := sm.Methods(http.MethodPost).Subrouter()
+	postRouter.HandleFunc("/",hp.AddProduct)
+	postRouter.Use(hp.MiddlewareProductValidation)
 
 	ser := &http.Server{Addr: ":9090",
 		Handler:     sm,
